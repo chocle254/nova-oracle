@@ -1,0 +1,9 @@
+{
+  "name": "Nova: Digital Personal Assistant",
+  "description": "A comprehensive digital assistant that manages your transactions, savings, and provides intelligent financial advice using the latest Gemini models. Nova features image/video analysis, Google Maps grounding for local insights, and advanced reasoning capabilities.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
