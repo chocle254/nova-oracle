@@ -372,23 +372,32 @@ export async function decodeAudioData(data: Uint8Array, ctx: AudioContext, sampl
 
 /**
  * Live Tech Opportunities & Hackathons Service
+ * FIX: Pulls a large, deduped set (15-25) and GUARANTEES broad hackathon coverage
+ * instead of capping at 6 mixed opportunities (which starved the hackathon list).
  */
 export const getTechOpportunities = async () => {
   const ai = getAI();
   const now = new Date();
   
   const systemInstruction = `You are Fable 5, an elite intelligence specializing in tech ecosystems, startup accelerators, and competitive hackathons.
-  MANDATE: Perform real-time web research to secure active, premium, upcoming (not expired) tech events, hackathons (e.g., Major League Hacking, Devpost, regional builder events), and startup applications (e.g., Y Combinator, Techstars, specialized VCs, accelerators) accepting submissions right now.
+  MANDATE: Perform exhaustive real-time web research to secure active, premium, upcoming (not expired) tech events, hackathons, and startup applications accepting submissions right now.
+  You search broadly across Devpost, Major League Hacking (MLH), HackerEarth, Devfolio, ETHGlobal, Kaggle, Hackathon.com, university/regional builder events, Y Combinator, Techstars, and specialized VC accelerators.
   Current Date: ${now.toDateString()}.`;
 
-  const query = `Find 6 premium, highly beneficial, active opportunities accepting entries after ${now.toDateString()} (Tech events, Hackathons, and Startup Accelerator applications).
-  Use search tools to gather exactly 6 active ones.
-  
+  const query = `Find as MANY active, currently-open opportunities as you can (aim for 15-25 total) that accept entries AFTER ${now.toDateString()}.
+
+  CRITICAL REQUIREMENTS:
+  - You MUST include a strong, diverse spread of HACKATHONS specifically. Keep searching across Devpost, MLH, HackerEarth, Devfolio, ETHGlobal, Kaggle, Hackathon.com, and regional/university events until you have AT LEAST 10 distinct hackathons that are still open.
+  - Also include Startup Accelerator Applications and Tech Events/Conferences.
+  - EXCLUDE anything already past its deadline.
+  - DEDUPLICATE by title (no repeats).
+  - Do not artificially limit the list — return everything relevant you find.
+
   For each entry, provide:
   - id: A short unique identifier (string)
   - title: Official Name
   - type: Must be exactly "Hackathon", "Startup Application", or "Tech Event"
-  - description: A short, strategic, highly inspiring description recommending the builder why to apply
+  - description: A short, strategic, highly inspiring description recommending why a builder should apply
   - deadline: Submission/registration close date (formatted as YYYY-MM-DD)
   - link: Exact official web link
   - location: Venue City & Country, or "Online", "Remote"
@@ -411,7 +420,7 @@ export const getTechOpportunities = async () => {
   }`;
 
   const response = await ai.models.generateContent({
-    model: MODELS.GENERAL, // Using general model (gemini-3.5-flash as default)
+    model: MODELS.GENERAL,
     contents: query,
     config: {
       systemInstruction,
@@ -439,65 +448,83 @@ export const getTechOpportunities = async () => {
 
 /**
  * Startup Validator Board Service
- * Emulates three elite multi-millionaire, 20+ years tech and accelerator veterans.
+ * FIX: Upgraded to a full VC investment-committee rubric. The board now scores
+ * every category /100, gives a hard verdict, and each partner names the single
+ * biggest risk that would make them pass — judging like real CEOs writing checks.
  */
 export const validateStartupIdea = async (idea: string, industry: string) => {
   const ai = getAI();
   const now = new Date();
 
-  const systemInstruction = `You are Fable 5, the core intelligence orchestrating an Elite Multi-Millionaire Advisory Board for startup founders.
-  Your task is to comprehensively audit, score, and challenge a user's startup idea. You MUST emulate three distinct, highly experienced (20+ years) serial entrepreneurs / investors:
+  const systemInstruction = `You are Fable 5, orchestrating an Elite Venture Board. Emulate three partners who think and speak like real CEOs/General Partners writing checks with their own money — blunt, specific, numbers-driven, no clichés.
+  Current Date: ${now.toDateString()}.
 
-  1. **Marcus Sterling (SaaS Serial Founder)**: $200M+ tech scale exits. Hyper-focused on unit economics (LTV/CAC ratio), market sizing, pricing parameters, and direct distribution lines.
-  2. **Dr. Elena Vance (Deep-Tech Architect)**: MIT PhD co-founder, exited $35M hardware/AI pivots. Hyper-focused on engineering feasibility, product defensibility, and building a sustainable tech moat.
-  3. **Akira Tanaka (Accelerator Venture Partner)**: Elite incubator General Partner backer of 200+ portfolio companies. Evaluates exact accelerator interests (e.g. Y Combinator, Techstars thresholds), user acquisition speed, and pitching mechanics.
+  THE BOARD:
+  1. **Marcus Sterling (Operator-CEO, SaaS)** — $200M+ exits. Owns unit economics: TAM/SAM/SOM, LTV/CAC, payback period, pricing, GTM, and distribution.
+  2. **Dr. Elena Vance (Deep-Tech CTO)** — MIT PhD, hardware/AI exits. Owns feasibility, defensibility, proprietary data/IP, and the real technical moat.
+  3. **Akira Tanaka (VC General Partner)** — backed 200+ companies. Owns fundability: traction signals, team/founder-market fit, timing, accelerator/fund alignment, and exit potential.
 
-  YOUR MANDATE:
-  - Do NOT speak in flat clichés. Give aggressive, candid, and constructive feedback from these personas.
-  - Perform real-time web research using googleSearch to find actual competitors in this space, what they are currently raised on, and point out active accelerators that might back this specific vertical.
-  - Cross-reference all elements for target user matches and strategic entry points.
+  MANDATE:
+  - Use googleSearch for REAL competitors (2024-2026), what they've raised, and active funds/accelerators in this exact vertical.
+  - Score EVERY category on the rubric out of 100. Be willing to give low scores. A weak idea MUST score below 50, a mediocre one below 70. Do not inflate.
+  - Compute the overall "rating" as a weighted blend of the rubric (market, problem severity, and moat weighted most heavily).
+  - Each advisor gives a candid verdict AND names the single biggest risk that would make them personally pass.
+  - Choose a "verdict" from: "STRONG_INVEST", "INVEST_WITH_CHANGES", "PASS", "HARD_PASS".
 
   Return results strictly in valid JSON matching this schema:
   {
-    "rating": 84, // Combined average out of 100
-    "summary": "High-level board synthesis of the idea...",
+    "rating": 0,
+    "verdict": "INVEST_WITH_CHANGES",
+    "summary": "Board synthesis written in a CEO's blunt voice...",
+    "rubric": {
+      "marketSize":        { "score": 0, "notes": "TAM/SAM/SOM reasoning with real figures" },
+      "problemSeverity":   { "score": 0, "notes": "Painkiller or vitamin? How acute is the pain?" },
+      "moatDefensibility": { "score": 0, "notes": "What stops a funded competitor copying this in 6 months?" },
+      "team":              { "score": 0, "notes": "Founder-market fit signals required to win" },
+      "businessModel":     { "score": 0, "notes": "Pricing, margins, LTV/CAC, payback period" },
+      "traction":          { "score": 0, "notes": "Evidence of demand and what milestone is needed next" },
+      "risks":             { "score": 0, "notes": "Top execution and market risks" }
+    },
     "targetUsers": [
-      { "segment": "Target niche", "reason": "Why they need this", "urgency": "High" }
+      { "segment": "Target niche", "reason": "Why they urgently need this", "urgency": "High" }
     ],
     "strongPoints": ["Defensible proprietary data", "High recurring potential"],
     "competitors": [
-      { "name": "Competitor Name", "moat": "Strategic differentiator to beat them" }
+      { "name": "Competitor Name", "raised": "$12M Series A (2025)", "moat": "How this startup can beat them" }
     ],
     "acceleratorAlignment": [
-      { "name": "Y Combinator (example)", "interestLevel": "High", "reason": "Why this matches their focus area" }
+      { "name": "Y Combinator (example)", "interestLevel": "High", "reason": "Why this matches their current focus" }
     ],
     "advisors": [
       {
         "name": "Marcus Sterling",
-        "rating": 85,
-        "feedback": "Your GTM strategy has one main vulnerability...",
+        "rating": 0,
+        "feedback": "Candid CEO feedback on unit economics and GTM...",
+        "biggestRisk": "The single thing that would make me pass.",
         "verdict": "Venture Scale Viable with Pricing Pivot"
       },
       {
         "name": "Dr. Elena Vance",
-        "rating": 78,
-        "feedback": "An API wrapper won't survive. To build a true moat...",
+        "rating": 0,
+        "feedback": "Candid feedback on feasibility and moat...",
+        "biggestRisk": "The single thing that would make me pass.",
         "verdict": "Technically Feasible but Requires IP Defensibility"
       },
       {
         "name": "Akira Tanaka",
-        "rating": 88,
-        "feedback": "YC is currently backing heavy infrastructure in this space. Your pitch should highlight...",
+        "rating": 0,
+        "feedback": "Candid feedback on fundability and traction...",
+        "biggestRisk": "The single thing that would make me pass.",
         "verdict": "High-Priority Application Target"
       }
     ]
   }`;
 
-  const query = `Analyze the following startup idea in-depth.
+  const query = `Evaluate this startup idea like a real investment committee writing a check.
   Idea: "${idea}"
   Category/Industry: "${industry}"
 
-  Use search tools to gather actual competitors established in 2024-2026 and list accelerators interested in this space.`;
+  Search for the ACTUAL competitors established in 2024-2026 (and what they've raised) plus the funds/accelerators currently active in this space. Score every rubric category honestly out of 100, name each advisor's biggest dealbreaker risk, and compute a weighted overall rating with a clear verdict.`;
 
   const response = await ai.models.generateContent({
     model: MODELS.COMPLEX, 
@@ -538,25 +565,27 @@ export const auditGithubRepo = async (repoUrl: string, filePaths: string[], file
   
   MANDATE: Output high-fidelity technical advice. Identify structural anomalies, architectural gaps, security issues (e.g., hardcoded keys, SQL injection vectors, weak auth, CORS flaws), code cleanliness, and resource usage efficiency.
   
-  You MUST specifically evaluate security against OWASP Top 10 vulnerabilities, construct an interactive system flow chart of the components, and provide a simulated concurrency speed performance benchmark.
+  You MUST specifically evaluate security against OWASP Top 10 vulnerabilities, construct an interactive system flow chart of the components, and provide a concurrency speed performance ESTIMATE.
+
+  IMPORTANT: The "concurrencySpeedAnalysis" is a THEORETICAL ESTIMATE derived from the architecture you observe, NOT a real load test. Treat it as projected guidance, never as measured results.
 
   Return results strictly in valid JSON matching this schema:
   {
-    "overallRating": 85, // Scale 1-100
+    "overallRating": 85,
     "summary": "High-level visual summary of the architecture and primary recommendations...",
     "stats": {
-      "securityFlaws": 2, // Integer number of key problems identified
-      "codeSmells": 4, // Integer number of smells
-      "architecturalGaps": 1 // Integer number of gaps
+      "securityFlaws": 2,
+      "codeSmells": 4,
+      "architecturalGaps": 1
     },
-    "architectureScore": 88, // out of 100
-    "securityScore": 92, // out of 100
-    "qualityScore": 80, // out of 100
+    "architectureScore": 88,
+    "securityScore": 92,
+    "qualityScore": 80,
     "keyFindings": [
       {
         "title": "Hardcoded AWS Config Secret Keys",
-        "severity": "CRITICAL", // CRITICAL, HIGH, MEDIUM, LOW
-        "type": "Security", // Security, Performance, Cleanliness, Architecture
+        "severity": "CRITICAL",
+        "type": "Security",
         "location": "/src/config/aws.ts",
         "description": "Exposing keys inside file codebases allows malicious crawler indexing.",
         "remediation": "Leverage process.env with encrypted environment values."
@@ -570,7 +599,7 @@ export const auditGithubRepo = async (repoUrl: string, filePaths: string[], file
     "owaspCompliance": [
       {
         "category": "A01:2021-Broken Access Control",
-        "status": "COMPLIANT", // COMPLIANT, WARNING, NON_COMPLIANT, CRITICAL_RISK
+        "status": "COMPLIANT",
         "description": "Validation checks on user privilege layers, path routing access controls, and endpoint ownership checks.",
         "findings": "Strict auth tokens checked on API handlers. No unverified permissions noted. Staging routes are correctly locked.",
         "remediationCode": "Ensure state routes verify roles on the server side on every CRUD call."
@@ -641,140 +670,31 @@ export const auditGithubRepo = async (repoUrl: string, filePaths: string[], file
 
 /**
  * Deployed Website QA Testing Agent
- * Acts as an agentic browser, inspects live URL content using search grounding, and compiles detailed user-journey QA reviews.
+ * FIX: Real testing now runs on a backend (api/qa-test.ts) using a headless
+ * browser (Playwright). It actually loads the URL, visits routes, probes the
+ * live DOM, and captures REAL screenshots, then a vision model grades them.
+ * This client function simply calls that endpoint — no more invented snapshots.
+ *
+ * Each returned snapshot includes `screenshot` (a base64 PNG data URL) you can
+ * render directly with <img src={snapshot.screenshot} />.
  */
 export const auditDeployedWebsite = async (siteUrl: string, customContext?: string) => {
-  const ai = getAI();
-
-  const systemInstruction = `You are Fable 5, an Elite QA Testing Agent and Lead Automation Engineer. 
-  Your task is to take a deployed web link and "taste/test" its components, routing, look-and-feel, accessibility levels, and functionality.
-
-  MANDATE:
-  - Perform real-time web research / search grounding on ${siteUrl} to locate actual information of the targeted site, including active titles, tags, headings, meta tags, and functional patterns.
-  - Review how a user signs up, logs in, manages forms, handles interactive states, and navigates.
-  - Grade the experience across UI/UX, Functionality, Security, and Speed, and pinpoint exactly what can go wrong.
-  - Sound like an elite browser-automation specialist who has audited thousands of web applications.
-
-  If a CODEBASE CONTEXT / PROJECT BLUEPRINT is provided in the instructions, you MUST prioritize understanding what the site is supposed to do from its code structure, and design 3 tailored user journey simulations.
-
-  For each journey in "userJourneySimulations", you must provide both sequential automation "logs" AND a corresponding parallel "snapshots" array of the SAME LENGTH (matching 1-to-1) that visualizes what is happening in the site's viewport at that specific progress step.
-
-  Return results strictly in valid JSON matching this schema:
-  {
-    "siteTitle": "Official Website Title",
-    "overallHealth": 88, // out of 100
-    "techStackDetected": ["React", "Tailwind CSS", "Vite", "Cloudflare"],
-    "inspectedRoutes": [
-      { "path": "/", "status": "200 OK", "type": "Main Hero & Features Showcase" },
-      { "path": "/login", "status": "200 OK", "type": "Authentication Portal" }
-    ],
-    "uxRating": 90, // out of 100
-    "functionalityRating": 84, // out of 100
-    "securityRating": 80, // out of 100
-    "performanceRating": 85, // out of 100
-    "userJourneySimulations": [
-      {
-        "flowName": "User Registration & Login Verification",
-        "description": "Simulated loading the /signup page, entering credentials, submitting forms, and cookie generation.",
-        "status": "PASS", // PASS, WARNING, FAIL
-        "logs": [
-          "GET ${siteUrl}/signup - Status 200",
-          "Found input field name='email', name='password', type='submit'",
-          "Form submission executed with mock assets",
-          "Verification check completed successfully"
-        ],
-        "snapshots": [
-          {
-            "stepIndex": 0,
-            "title": "Register Portal Viewport",
-            "route": "/signup",
-            "mockLayoutType": "login", // Options: "landing", "login", "dashboard", "api", "list", "settings", "checkout", "error"
-            "explanation": "Viewport shows initial signup fields and verification triggers. System responds in 110ms.",
-            "interactiveElements": [
-              { "label": "Email Target", "value": "admin@test-vanguard.io", "type": "input" },
-              { "label": "PassPhrase", "value": "••••••••", "type": "input" },
-              { "label": "Register button", "value": "SUBMIT", "type": "button" }
-            ]
-          },
-          {
-            "stepIndex": 1,
-            "title": "Active Form Inputs Focus",
-            "route": "/signup",
-            "mockLayoutType": "login",
-            "explanation": "System detects keyboard typing triggers properly with no accessibility blocks.",
-            "interactiveElements": [
-              { "label": "Typed Email", "value": "admin@test-vanguard.io", "type": "input" },
-              { "label": "Submit triggers", "value": "ACTIVE", "type": "badge" }
-            ]
-          },
-          {
-            "stepIndex": 2,
-            "title": "Executing Form Submits Gate",
-            "route": "/signup",
-            "mockLayoutType": "checkout",
-            "explanation": "Form data is verified, sanitization checks evaluated, and response is returned successfully.",
-            "interactiveElements": [
-              { "label": "CORS preflight checks", "value": "COMPLIANT", "type": "badge" },
-              { "label": "Encryption token", "value": "VANGUARD_SECURED", "type": "text" }
-            ]
-          },
-          {
-            "stepIndex": 3,
-            "title": "Authentication Cookies Configured",
-            "route": "/dashboard",
-            "mockLayoutType": "dashboard",
-            "explanation": "Client context is updated. Cookie active state is verified correctly.",
-            "interactiveElements": [
-              { "label": "Active user ID", "value": "0x4012A", "type": "text" },
-              { "label": "Session verification", "value": "PASS", "type": "badge" }
-            ]
-          }
-        ]
-      }
-    ],
-    "problemsIdentified": [
-      {
-        "issue": "Missing input safety labels on login textboxes",
-        "impact": "Low-vision screen readers cannot recognize input target focuses safely.",
-        "severity": "Medium", // High, Medium, Low
-        "remediationCode": "<input id='email' name='email' aria-label='Your Email Address' />"
-      }
-    ],
-    "exceptionalFeatures": [
-      "Beautiful typography pairings and responsive fluid grids.",
-      "Blazing-fast responsive page loads with lazy-assets."
-    ]
-  }`;
-
-  const query = `Analyze and taste the deployed website:
-  Site URL to inspect: ${siteUrl}
-  Optional instructions/context: ${customContext || "None specified"}
-
-  Use search tools to retrieve contents, pages, header configurations, and visual outline parameters. Construct a deep QA audit based on the live data retrieved. Ensure each userJourneySimulations log step corresponds exactly to a structured visual snapshot.`;
-
-  const response = await ai.models.generateContent({
-    model: MODELS.COMPLEX, 
-    contents: query,
-    config: {
-      systemInstruction,
-      tools: [{ googleSearch: {} }],
-      responseMimeType: "application/json"
-    }
+  const res = await fetch("/api/qa-test", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ siteUrl, customContext }),
   });
 
-  const rawJson = (response.text || "").trim();
-  try {
-    return JSON.parse(rawJson);
-  } catch (e) {
-    console.error("Failed parsing website audit JSON directly.", e);
-    const match = rawJson.match(/\{[\s\S]*\}/);
-    if (match) {
-      try {
-        return JSON.parse(match[0]);
-      } catch (err) {
-        throw new Error("Invalid response format from live website auditor: " + rawJson);
-      }
+  if (!res.ok) {
+    let message = res.statusText;
+    try {
+      const body = await res.json();
+      message = body?.error || message;
+    } catch {
+      /* ignore non-JSON error bodies */
     }
-    throw e;
+    throw new Error(message || "QA test failed");
   }
+
+  return res.json();
 };
