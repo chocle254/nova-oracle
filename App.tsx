@@ -6,12 +6,17 @@ import {
   TrendingUp, ArrowUpRight, ArrowDownRight, Heart, Globe, BookOpen, 
   ChevronRight, ArrowLeft, Loader2, ExternalLink, Info, CreditCard, Landmark, 
   Coins, Smartphone, PieChart as PieIcon, Layers, Mic, X, FileText, Zap, Lightbulb,
-  Target, BriefcaseBusiness, AlertCircle, TrendingDown, RefreshCcw, Smile, Clock, BarChart3
+  Target, BriefcaseBusiness, AlertCircle, TrendingDown, RefreshCcw, Smile, Clock, BarChart3,
+  Building
 } from 'lucide-react';
 import ChatInterface from './components/ChatInterface';
 import AdviserPanel from './components/AdviserPanel';
 import PredictorPanel from './components/PredictorPanel';
 import TransactionForm from './components/TransactionForm';
+import IntimacyPanel from './components/IntimacyPanel';
+import TechHubPanel from './components/TechHubPanel';
+import StartupValidator from './components/StartupValidator';
+import CodeWebAuditor from './components/CodeWebAuditor';
 import { GoogleGenAI, Modality } from "@google/genai";
 import { getFastResponse, getSearchResponse, getFinancialReport, encodeBase64, decodeBase64, decodeAudioData, getForexNewsAlerts } from './services/geminiService';
 import ReactMarkdown from 'react-markdown';
@@ -410,78 +415,10 @@ const App: React.FC = () => {
             </div>
           </div>
         );
-      case 'finance':
+      case 'intimacy':
         return (
-          <div className="space-y-8 animate-in slide-in-from-right-4">
-             <div className="bg-indigo-600 rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-1000"><Coins size={120}/></div>
-               <p className="text-indigo-100 text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Net Portfolio</p>
-               <h2 className="text-5xl font-black mt-2 tracking-tighter">{formatMoney(totalBalance)}</h2>
-               <div className="flex gap-4 mt-8">
-                 <div className="flex items-center gap-1.5 bg-white/10 px-4 py-2 rounded-2xl text-[10px] font-black backdrop-blur-md border border-white/5 uppercase">
-                   <ArrowUpRight size={14} className="text-emerald-400" /> {formatMoney(totalIncome)}
-                 </div>
-                 <div className="flex items-center gap-1.5 bg-white/10 px-4 py-2 rounded-2xl text-[10px] font-black backdrop-blur-md border border-white/5 uppercase">
-                   <ArrowDownRight size={14} className="text-red-400" /> {formatMoney(totalExpense)}
-                 </div>
-               </div>
-            </div>
-
-            <div className="flex items-center justify-between px-2">
-              <h3 className="font-bold text-slate-100 flex items-center gap-2"><Zap size={18} className="text-indigo-400"/> AI Insights</h3>
-              <button onClick={generateReport} className="text-indigo-400 p-2 bg-indigo-500/10 rounded-xl text-xs font-bold flex items-center gap-1">
-                {isLoadingModule ? <Loader2 size={14} className="animate-spin"/> : <FileText size={14}/>} Audit
-              </button>
-            </div>
-
-            {financialReport && (
-              <div className="bg-slate-900 rounded-3xl p-6 border border-indigo-500/30 shadow-xl animate-in zoom-in-95">
-                <div className="flex justify-between mb-4">
-                  <span className="text-[10px] font-black text-indigo-400 uppercase tracking-widest">Nova's AI Audit</span>
-                  <button onClick={() => setFinancialReport(null)} className="text-slate-500"><X size={14}/></button>
-                </div>
-                <div className="prose prose-invert prose-sm text-slate-300 text-xs leading-relaxed whitespace-pre-wrap">
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{financialReport}</ReactMarkdown>
-                </div>
-              </div>
-            )}
-
-            <section className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="font-bold text-slate-100 flex items-center gap-2"><CreditCard size={18} className="text-indigo-400"/> Wallets</h3>
-                <button onClick={() => setIsAddingWallet(true)} className="text-indigo-400 p-1 bg-indigo-500/10 rounded-lg"><Plus size={16}/></button>
-              </div>
-              <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar -mx-4 px-4">
-                {wallets.map(w => (
-                  <div key={w.id} className="min-w-[160px] bg-slate-900 p-5 rounded-3xl border border-slate-800 shadow-sm">
-                    <div className="flex items-center gap-2 mb-3 text-slate-500">
-                      {w.type === 'mobile' ? <Smartphone size={14}/> : <Landmark size={14}/>}
-                      <span className="text-[10px] font-black uppercase tracking-widest">{w.name}</span>
-                    </div>
-                    <p className="text-xl font-black text-slate-100">{formatMoney(w.balance)}</p>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            <section className="bg-slate-900 rounded-[2.5rem] p-8 text-white border border-slate-800 shadow-2xl relative overflow-hidden">
-              <div className="absolute top-0 right-0 p-8 opacity-5"><Layers size={100}/></div>
-              <h3 className="font-black text-xs uppercase tracking-widest flex items-center gap-2 text-indigo-400 mb-6">AI Fund Allocation</h3>
-              <div className="grid grid-cols-3 gap-2">
-                  <div className="bg-white/5 p-4 rounded-2xl text-center backdrop-blur-sm border border-white/5">
-                    <p className="text-[8px] font-black uppercase text-slate-500 mb-1">Savings</p>
-                    <p className="text-xs font-bold text-slate-100">{formatMoney(transactions.filter(t => t.destination === 'savings').reduce((a,c) => a+c.amount, 0))}</p>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-2xl text-center border border-indigo-500/30">
-                    <p className="text-[8px] font-black uppercase text-indigo-400 mb-1">Invested</p>
-                    <p className="text-xs font-bold text-slate-100">{formatMoney(transactions.filter(t => t.destination === 'investments').reduce((a,c) => a+c.amount, 0))}</p>
-                  </div>
-                  <div className="bg-white/5 p-4 rounded-2xl text-center border border-white/5">
-                    <p className="text-[8px] font-black uppercase text-slate-500 mb-1">Ready</p>
-                    <p className="text-xs font-bold text-slate-100">{formatMoney(transactions.filter(t => t.destination === 'ready_to_use').reduce((a,c) => a+c.amount, 0))}</p>
-                  </div>
-              </div>
-            </section>
+          <div className="h-[600px] -mx-4">
+            <IntimacyPanel />
           </div>
         );
       case 'wellbeing':
@@ -493,31 +430,37 @@ const App: React.FC = () => {
             </div>
           </div>
         );
-      case 'study':
+      case 'tech_hub':
         return (
           <div className="space-y-6 animate-in slide-in-from-right-4">
-            <h3 className="font-bold text-slate-100 px-2 flex items-center gap-2"><BookOpen size={18} className="text-rose-400"/> Study Library</h3>
-            <div className="space-y-3">
-              {STUDY_LIBRARY.map(topic => (
-                <div key={topic.id} className="bg-slate-900 p-4 rounded-2xl border border-slate-800 hover:border-rose-400 transition-colors cursor-pointer group">
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="text-[10px] font-bold text-rose-400 uppercase px-2 py-0.5 bg-rose-400/10 rounded-full">{topic.category}</span>
-                    <ChevronRight size={14} className="text-slate-600 group-hover:text-rose-400" />
-                  </div>
-                  <h4 className="font-bold text-slate-100">{topic.title}</h4>
-                  <p className="text-xs text-slate-500 mt-1">{topic.description}</p>
-                </div>
-              ))}
-            </div>
+            <TechHubPanel />
+          </div>
+        );
+      case 'startup_validator':
+        return (
+          <div className="space-y-6 animate-in slide-in-from-right-4">
+            <StartupValidator />
+          </div>
+        );
+      case 'code_website_auditor':
+        return (
+          <div className="space-y-6 animate-in slide-in-from-right-4">
+            <CodeWebAuditor />
           </div>
         );
       default:
         return (
           <div className="grid grid-cols-2 gap-4">
-            <DashboardCard title="Finance" subtitle="Wallet" icon={<WalletIcon size={24}/>} color="bg-indigo-600" onClick={() => setActiveModule('finance')} />
+            <DashboardCard title="Intimacy" subtitle="Expert" icon={<Heart size={24}/>} color="bg-rose-600" onClick={() => setActiveModule('intimacy')} />
             <DashboardCard title="Well-being" subtitle="Health" icon={<Heart size={24}/>} color="bg-emerald-500" onClick={() => setActiveModule('wellbeing')} />
             <DashboardCard title="Forex" subtitle="Markets" icon={<Globe size={24}/>} color="bg-amber-500" onClick={() => setActiveModule('forex')} />
-            <DashboardCard title="Study" subtitle="Library" icon={<BookOpen size={24}/>} color="bg-rose-500" onClick={() => setActiveModule('study')} />
+            <DashboardCard title="Tech Hub" subtitle="Opportunities" icon={<Sparkles size={24}/>} color="bg-indigo-600" onClick={() => setActiveModule('tech_hub')} />
+            <div className="col-span-2">
+              <DashboardCard title="Startup Board" subtitle="Validate Ventures" icon={<Building size={24}/>} color="bg-violet-600" onClick={() => setActiveModule('startup_validator')} />
+            </div>
+            <div className="col-span-2">
+              <DashboardCard title="QA Auditor" subtitle="Repo & Web QA streams" icon={<Layers size={24}/>} color="bg-indigo-500" onClick={() => setActiveModule('code_website_auditor')} />
+            </div>
           </div>
         );
     }
@@ -540,7 +483,15 @@ const App: React.FC = () => {
             </div>
           )}
           <h1 className="font-bold text-lg text-slate-100 tracking-tight">
-            {activeTab === AppTab.DASHBOARD && activeModule !== 'none' ? activeModule.charAt(0).toUpperCase() + activeModule.slice(1) : 'Nova'}
+            {activeTab === AppTab.DASHBOARD && activeModule !== 'none' 
+              ? activeModule === 'code_website_auditor' 
+                ? 'QA Auditor' 
+                : activeModule === 'startup_validator' 
+                  ? 'Startup Board' 
+                  : activeModule === 'tech_hub' 
+                    ? 'Tech Hub'
+                    : activeModule.charAt(0).toUpperCase() + activeModule.slice(1) 
+              : 'Nova'}
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -630,26 +581,8 @@ const App: React.FC = () => {
           <PredictorPanel />
         </div>
 
-        <div className={`absolute inset-0 overflow-y-auto no-scrollbar transition-opacity duration-300 ${activeTab === AppTab.WALLET ? 'opacity-100 z-10' : 'opacity-0 -z-10 pointer-events-none'}`}>
-          <div className="p-4 space-y-4">
-             <h2 className="text-2xl font-black text-slate-100 mb-6 px-2">History</h2>
-             {transactions.map(t => (
-                <div key={t.id} className="bg-slate-900 p-5 rounded-[1.5rem] flex items-center justify-between border border-slate-800 shadow-sm mb-3">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${t.type === 'income' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                      {t.type === 'income' ? <ArrowUpRight size={24} /> : <ArrowDownRight size={24} />}
-                    </div>
-                    <div>
-                      <p className="text-sm font-bold text-slate-100 leading-tight">{t.description}</p>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">{t.category} • {wallets.find(w => w.id === t.walletId)?.name}</p>
-                    </div>
-                  </div>
-                  <span className={`font-black ${t.type === 'income' ? 'text-emerald-400' : 'text-slate-100'}`}>
-                    {t.type === 'income' ? '+' : '-'}{formatMoney(t.amount)}
-                  </span>
-                </div>
-             ))}
-           </div>
+        <div className={`absolute inset-0 overflow-y-auto no-scrollbar transition-opacity duration-300 ${activeTab === AppTab.INTIMACY ? 'opacity-100 z-10' : 'opacity-0 -z-10 pointer-events-none'}`}>
+          <IntimacyPanel />
         </div>
       </main>
 
@@ -710,7 +643,7 @@ const App: React.FC = () => {
         />
         <NavButton active={activeTab === AppTab.ADVISER} icon={<Briefcase size={24} />} label="Advice" onClick={() => setActiveTab(AppTab.ADVISER)} />
         <NavButton active={activeTab === AppTab.PREDICTOR} icon={<Target size={24} />} label="Oracle" onClick={() => setActiveTab(AppTab.PREDICTOR)} />
-        <NavButton active={activeTab === AppTab.WALLET} icon={<WalletIcon size={24} />} label="Wallet" onClick={() => setActiveTab(AppTab.WALLET)} />
+        <NavButton active={activeTab === AppTab.INTIMACY} icon={<Heart size={24} />} label="Expert" onClick={() => setActiveTab(AppTab.INTIMACY)} />
       </nav>
 
       {isAddingTransaction && <TransactionForm wallets={wallets} onAdd={addTransaction} onClose={() => setIsAddingTransaction(false)} />}
@@ -751,7 +684,7 @@ const App: React.FC = () => {
 };
 
 const DashboardCard: React.FC<{title: string, subtitle: string, icon: React.ReactNode, color: string, onClick: () => void}> = ({title, subtitle, icon, color, onClick}) => (
-  <button onClick={onClick} className="bg-slate-900 p-6 rounded-[2rem] border border-slate-800 shadow-sm flex flex-col items-start text-left hover:border-indigo-500 transition-all duration-300 group">
+  <button onClick={onClick} className="w-full bg-slate-900 p-6 rounded-[2rem] border border-slate-800 shadow-sm flex flex-col items-start text-left hover:border-indigo-500 transition-all duration-300 group">
     <div className={`${color} p-4 rounded-2xl text-white mb-4 group-hover:scale-110 transition-transform shadow-lg shadow-black/20`}>{icon}</div>
     <h3 className="font-bold text-slate-100 text-lg">{title}</h3>
     <p className="text-[10px] text-slate-500 font-bold uppercase mt-1 tracking-widest">{subtitle}</p>

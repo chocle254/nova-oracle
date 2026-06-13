@@ -1,12 +1,11 @@
-
 import React from 'react';
 
-// Use standard model names as per @google/genai coding guidelines
+// Recommended models as per the latest guidelines
 export const MODELS = {
-  FAST: 'gemini-flash-lite-latest',
-  GENERAL: 'gemini-3-flash-preview',
-  COMPLEX: 'gemini-3-pro-preview',
-  MAPS: 'gemini-2.5-flash',
+  FAST: 'gemini-3.5-flash',
+  GENERAL: 'gemini-3.5-flash',
+  COMPLEX: 'gemini-3.5-flash',
+  MAPS: 'gemini-3.5-flash', // Compatibility maps and search
 };
 
 export const CATEGORIES = [

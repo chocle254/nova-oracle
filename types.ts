@@ -60,8 +60,8 @@ export enum AppTab {
   DASHBOARD = 'dashboard',
   CHAT = 'chat',
   ADVISER = 'adviser',
-  WALLET = 'wallet',
+  INTIMACY = 'intimacy',
   PREDICTOR = 'predictor'
 }
 
-export type DashboardModule = 'none' | 'finance' | 'wellbeing' | 'forex' | 'study';
+export type DashboardModule = 'none' | 'intimacy' | 'wellbeing' | 'forex' | 'tech_hub' | 'startup_validator' | 'code_website_auditor';

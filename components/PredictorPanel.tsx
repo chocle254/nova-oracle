@@ -1,7 +1,6 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { getPredictionResponse, getBatchPredictionResponse } from '../services/geminiService';
-import { Search, TrendingUp, Target, Globe, Loader2, Info, ChevronRight, BarChart3, Trophy, Gavel, ExternalLink, Zap, Users, ShieldAlert, ImageIcon, X, Sparkles, FileStack } from 'lucide-react';
+import { Search, TrendingUp, Target, Globe, Loader2, Info, ChevronRight, BarChart3, Trophy, Gavel, ExternalLink, Zap, Users, ShieldAlert, ImageIcon, X, Sparkles, FileStack, Plus } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -19,12 +18,12 @@ const PredictorPanel: React.FC = () => {
   const resultRef = useRef<HTMLDivElement>(null);
 
   const statuses = [
-    "Scanning All Fixtures in Images...",
-    "Filtering for High-Conviction Matchups...",
-    "Auditing Squad Injury Reports...",
-    "Evaluating Bench Impact & Tactical Depth...",
-    "Simulating Correct Score Probability (95%+)...",
-    "Finalizing Top 10 High-Confidence Verdicts..."
+    "Initializing Institutional Strategy Engine...",
+    "Scanning Global Fixtures & Liquidity...",
+    "Auditing Real-time Squad Intel (Injuries/Lineups)...",
+    "Performing Intermarket Divergence Check...",
+    "Simulating Tactical Outcomes (99% Precision)...",
+    "Finalizing High-Conviction Verdicts..."
   ];
 
   useEffect(() => {
@@ -40,7 +39,6 @@ const PredictorPanel: React.FC = () => {
     return () => clearInterval(interval);
   }, [isLoading]);
 
-  // Fix: Explicitly type files as File[] to resolve 'unknown' type error in URL.createObjectURL
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files: File[] = Array.from(e.target.files || []);
     if (files.length > 0) {
@@ -63,12 +61,10 @@ const PredictorPanel: React.FC = () => {
 
     try {
       if (selectedImages.length > 0) {
-        // Batch analysis mode
         const res = await getBatchPredictionResponse(selectedImages);
         setPrediction(res.text);
         setUrls(res.urls);
       } else {
-        // Text mode
         const res = await getPredictionResponse(query);
         setPrediction(res.text);
         setUrls(res.urls);
@@ -95,7 +91,7 @@ const PredictorPanel: React.FC = () => {
           <Target className="text-indigo-400" size={32} /> Nova Oracle
         </h2>
         <p className="text-slate-400 text-sm font-medium leading-relaxed">
-          High-precision 95%+ Correct Score forecasting.
+          Elite Institutional Forecasting. 99% Precision Mandate.
         </p>
       </div>
 
@@ -201,7 +197,7 @@ const PredictorPanel: React.FC = () => {
               <Target size={18} /> {selectedImages.length > 0 ? "Batch Strategy Audit" : "Definitive Match Audit"}
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-2 py-1 rounded-lg">95% Confidence</span>
+              <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-400/10 px-2 py-1 rounded-lg">99% Confidence Mandate</span>
             </div>
           </div>
           
@@ -242,7 +238,7 @@ const PredictorPanel: React.FC = () => {
           <div className="space-y-1">
             <p className="text-xs font-bold text-slate-300">Analytical Mandate</p>
             <p className="text-[10px] text-slate-500 leading-relaxed">
-              Nova Oracle is designed to simulate match outcomes using high-fidelity squad data. Batch analysis identifies the 10 highest-probability Correct Score verdicts.
+              Nova Oracle is designed to simulate match outcomes using high-fidelity squad data.
             </p>
           </div>
         </div>
@@ -250,12 +246,5 @@ const PredictorPanel: React.FC = () => {
     </div>
   );
 };
-
-const Plus = ({ size }: { size: number }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="12" y1="5" x2="12" y2="19"></line>
-    <line x1="5" y1="12" x2="19" y2="12"></line>
-  </svg>
-);
 
 export default PredictorPanel;
